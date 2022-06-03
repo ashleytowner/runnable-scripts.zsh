@@ -22,7 +22,7 @@ function scripts() {
     done
   fi
   for f in $(find -maxdepth 1 -type f -executable); do
-    OPTIONS="${OPTIONS}./${f}\n"
+    OPTIONS="${OPTIONS}${f}\n"
   done
   if [ -f package.json ]; then
     if [ -f yarn.lock ]; then
@@ -37,9 +37,9 @@ function scripts() {
   fi
 
   if [ $1 ]; then
-    SCRIPT=$(echo $OPTIONS | grep -ve "^$" | fzf -1 --query $1)
+    SCRIPT=$(printf $OPTIONS | grep -ve "^$" | fzf -1 --query $1)
   else
-    SCRIPT=$(echo $OPTIONS | grep -ve "^$" | fzf)
+    SCRIPT=$(printf $OPTIONS | grep -ve "^$" | fzf)
   fi
 
   if [ $SCRIPT ]; then
