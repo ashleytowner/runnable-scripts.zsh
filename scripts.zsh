@@ -16,24 +16,28 @@
 #   * fzf
 function scripts() {
   OPTIONS=""
+	# Makefile
   if [ -f Makefile ]; then
     for f in $(cat Makefile | grep -oe "^[a-zA-Z0-9\.]*:"); do
       OPTIONS="${OPTIONS}make ${f}\n"
     done
   fi
+	# Executables
   for f in $(find -maxdepth 1 -type f -executable); do
     OPTIONS="${OPTIONS}${f}\n"
   done
+	# NPM/Yarn
   if [ -f package.json ]; then
+		node_package_scripts=$(cat package.json | jq '.scripts | keys | .[]' -r)
+		node_package_scripts="${node_package_scripts}\ninstall"
     if [ -f yarn.lock ]; then
-      for f in $(cat package.json | jq '.scripts | keys | .[]' -r); do
-        OPTIONS="${OPTIONS}yarn run ${f}\n"
-      done
+			node_package_manager="yarn"
     else
-      for f in $(cat package.json | jq '.scripts | keys | .[]' -r); do
-        OPTIONS="${OPTIONS}npm run ${f}\n"
-      done
+			node_package_manager="npm run"
     fi
+		for f in $(echo $node_package_scripts); do
+			OPTIONS="${OPTIONS}${node_package_manager} ${f}\n"
+		done
   fi
 
   if [ $1 ]; then
