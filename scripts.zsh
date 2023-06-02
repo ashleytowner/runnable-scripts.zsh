@@ -14,18 +14,35 @@
 #   * find
 #   * jq
 #   * fzf
+
 function scripts() {
+	deps=('grep' 'find' 'jq' 'fzf')
+	failed=()
+	for i in $deps; do
+		if ! command -v $i &> /dev/null; then
+			failed+=("$i")
+		fi
+	done
+
+	if [ ${#failed[@]} -gt 0 ]; then
+		echo "\e[31mMissing dependencies:" 1>&2
+		for i in $failed; do
+			echo "\e[31m- $i" 1>&2
+		done
+		return 1
+	fi
+
   OPTIONS=""
+	# Executables in current directory
+  for f in $(find -maxdepth 1 -type f -executable); do
+    OPTIONS="${OPTIONS}${f}\n"
+  done
 	# Makefile
   if [ -f Makefile ]; then
     for f in $(cat Makefile | grep -oe "^[a-zA-Z0-9\.]*:"); do
       OPTIONS="${OPTIONS}make ${f}\n"
     done
   fi
-	# Executables
-  for f in $(find -maxdepth 1 -type f -executable); do
-    OPTIONS="${OPTIONS}${f}\n"
-  done
 	# NPM/Yarn
   if [ -f package.json ]; then
 		node_package_scripts=$(cat package.json | jq '.scripts | keys | .[]' -r)
@@ -39,6 +56,10 @@ function scripts() {
 			OPTIONS="${OPTIONS}${node_package_manager} ${f}\n"
 		done
   fi
+	# Executables in $PATH
+	for f in $(find $(echo $PATH | tr ':' ' ') -type f -executable 2> /dev/null | awk -F/ '{ print $NF }'); do
+		OPTIONS="${OPTIONS}${f}\n"
+	done
 
   if [ $1 ]; then
     SCRIPT=$(printf $OPTIONS | grep -ve "^$" | fzf -1 --query $1)
