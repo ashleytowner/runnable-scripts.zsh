@@ -17,7 +17,7 @@ with the `scripts` command.
 
 ## Dependencies
 
-* [fd / fdfind](https://github.com/sharkdp/fd)
+* find
 * grep (with extended regex support)
 * [jq](https://stedolan.github.io/jq/)
 * [fzf](https://github.com/junegunn/fzf)
