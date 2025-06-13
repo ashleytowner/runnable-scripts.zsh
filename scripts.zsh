@@ -34,7 +34,7 @@ function scripts() {
 
   OPTIONS=""
 	# Executables in current directory
-  for f in $(find -maxdepth 1 -type f -executable); do
+  for f in $(find . -maxdepth 1 -type f -perm +111); do
     OPTIONS="${OPTIONS}${f}\n"
   done
 	# Makefile
